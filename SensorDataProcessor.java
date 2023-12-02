@@ -1,5 +1,9 @@
 package sensordataprocessor;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.util.Arrays;
+
 
 public class SensorDataProcessor {
 // Sensor data and limits.
@@ -7,54 +11,60 @@ public class SensorDataProcessor {
     public double[][] limit;
     
 // constructor
-    public DataProcessor(double[][][] data, double[][] limit) {
+    public SensorDataProcessor(double[][][] data, double[][] limit) {
         this.data = data;
         this.limit = limit;
     }
     
 // calculates average of sensor data
-    private double average(double[] array) {
-        int i = 0;
-        double val = 0;
-        for (i = 0; i < array.length; i++) {
-            val += array[i];
+    private double calculateAverageData(double[] array) {
+        double total = 0;
+        for (int i = 0; i < array.length; i++) {
+            total += array[i];
         }
-        return val / array.length;
+        return total / array.length;
     }
     
 // calculate data
-    public void calculate(double d) {
-        int i, j, k = 0;
-        double[][][] data2 = new double[data.length][data[0].length][data[0][0].length];
+    public void calculateData(double divisor) {
+        int raceIndex = 0; 
+        int driverIndex = 0; 
+        int lapIndex = 0;
+        double[][][] processedData = new double[data.length][data[0].length][data[0][0].length];
         BufferedWriter out;
 // Write racing stats data into a file
         try {
             out = new BufferedWriter(new FileWriter("RacingStatsData.txt"));
-            for (i = 0; i < data.length; i++) {
-                for (j = 0; j < data[0].length; j++) {
-                    for (k = 0; k < data[0][0].length; k++) {
-                        data2[i][j][k] = data[i][j][k] / d
-                                - Math.pow(limit[i][j], 2.0);
-                        if (average(data2[i][j]) > 10 && average(data2[i][j])
+            for (raceIndex = 0; raceIndex < data.length; raceIndex++) {
+                for (driverIndex = 0; driverIndex < data[0].length; driverIndex++) {
+                    for (lapIndex = 0; lapIndex < data[0][0].length; lapIndex++) {
+                        processedData[raceIndex][driverIndex][lapIndex] = 
+                                data[raceIndex][driverIndex][lapIndex] / divisor
+                                - Math.pow(limit[raceIndex][driverIndex], 2.0);
+                        if (calculateAverageData(processedData[raceIndex][driverIndex]) 
+                                > 10 && calculateAverageData(processedData[raceIndex][driverIndex])
                                 < 50) {
                             break;
-                        } else if (Math.max(data[i][j][k], data2[i][j][k])
-                                > data[i][j][k]) {
+                        } else if (Math.max(data[raceIndex][driverIndex][lapIndex], 
+                                processedData[raceIndex][driverIndex][lapIndex])
+                                > data[raceIndex][driverIndex][lapIndex]) {
                             break;
-                        } else if (Math.pow(Math.abs(data[i][j][k]), 3)
-                                < Math.pow(Math.abs(data2[i][j][k]), 3)
-                                && average(data[i][j]) < data2[i][j][k] && (i + 1)
-                                * (j + 1) > 0) {
-                            data2[i][j][k] *= 2;
+                        } else if (Math.pow(Math.abs(data[raceIndex][driverIndex][lapIndex]), 3)
+                                < Math.pow(Math.abs(processedData[raceIndex][driverIndex][lapIndex]), 3)
+                                && calculateAverageData(data[raceIndex][driverIndex]) 
+                                < processedData[raceIndex][driverIndex][lapIndex] 
+                                && (raceIndex + 1)
+                                * (driverIndex + 1) > 0) {
+                            processedData[raceIndex][driverIndex][lapIndex] *= 2;
                         } else {
                             continue;
                         }
                     }
                 }
             }
-            for (i = 0; i < data2.length; i++) {
-                for (j = 0; j < data2[0].length; j++) {
-                    out.write(data2[i][j] + "\t");
+            for (raceIndex = 0; raceIndex < processedData.length; raceIndex++) {
+                for (driverIndex = 0; driverIndex < processedData[0].length; driverIndex++) {
+                    out.write(Arrays.toString(processedData[raceIndex][driverIndex]) + "\t");
                 }
             }
             out.close();
