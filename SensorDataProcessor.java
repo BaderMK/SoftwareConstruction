@@ -1,68 +1,70 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
- */
 package sensordataprocessor;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 
 /**
  *
  * @author bader
  */
 public class SensorDataProcessor {
-// Senson data and limits.
+// Sensor data and limits.
 
     public double[][][] data;
     public double[][] limit;
+    
 // constructor
-
-    public DataProcessor(double[][][] data, double[][] limit) {
+    public SensorDataProcessor(double[][][] data, double[][] limit) {
         this.data = data;
         this.limit = limit;
     }
 // calculates average of sensor data
 
-    private double average(double[] array) {
-        int i = 0;
-        double val = 0;
-        for (i = 0; i < array.length; i++) {
-            val += array[i];
+    private double calculateAverageData(double[] array) {
+        double total = 0;
+        for (int i = 0; i < array.length; i++) {
+            total += array[i];
         }
-        return val / array.length;
+        return total / array.length;
     }
 // calculate data
 
-    public void calculate(double d) {
-        int i, j, k = 0;
-        double[][][] data2 = new double[data.length][data[0].length][data[0][0].length];
+    public void calculateData(double divisor) {
+        double[][][] processedData = new double[data.length][data[0].length][data[0][0].length];
         BufferedWriter out;
 // Write racing stats data into a file
         try {
             out = new BufferedWriter(new FileWriter("RacingStatsData.txt"));
-            for (i = 0; i < data.length; i++) {
-                for (j = 0; j < data[0].length; j++) {
-                    for (k = 0; k < data[0][0].length; k++) {
-                        data2[i][j][k] = data[i][j][k] / d
-                                - Math.pow(limit[i][j], 2.0);
-                        if (average(data2[i][j]) > 10 && average(data2[i][j])
+            for (int firstArrayIndex = 0; firstArrayIndex < data.length; firstArrayIndex++) {
+                for (int secondArrayIndex = 0; secondArrayIndex < data[0].length; secondArrayIndex++) {
+                    for (int thirdArrayIndex = 0; thirdArrayIndex < data[0][0].length; thirdArrayIndex++) {
+                        processedData[firstArrayIndex][secondArrayIndex][thirdArrayIndex] = 
+                                data[firstArrayIndex][secondArrayIndex][thirdArrayIndex] / divisor
+                                - Math.pow(limit[firstArrayIndex][secondArrayIndex], 2.0);
+                        if (calculateAverageData(processedData[firstArrayIndex][secondArrayIndex]) 
+                                > 10 && calculateAverageData(processedData[firstArrayIndex][secondArrayIndex])
                                 < 50) {
                             break;
-                        } else if (Math.max(data[i][j][k], data2[i][j][k])
-                                > data[i][j][k]) {
+                        } else if (Math.max(data[firstArrayIndex][secondArrayIndex][thirdArrayIndex], 
+                                processedData[firstArrayIndex][secondArrayIndex][thirdArrayIndex])
+                                > data[firstArrayIndex][secondArrayIndex][thirdArrayIndex]) {
                             break;
-                        } else if (Math.pow(Math.abs(data[i][j][k]), 3)
-                                < Math.pow(Math.abs(data2[i][j][k]), 3)
-                                && average(data[i][j]) < data2[i][j][k] && (i + 1)
-                                * (j + 1) > 0) {
-                            data2[i][j][k] *= 2;
+                        } else if (Math.pow(Math.abs(data[firstArrayIndex][secondArrayIndex][thirdArrayIndex]), 3)
+                                < Math.pow(Math.abs(processedData[firstArrayIndex][secondArrayIndex][thirdArrayIndex]), 3)
+                                && calculateAverageData(data[firstArrayIndex][secondArrayIndex]) 
+                                < processedData[firstArrayIndex][secondArrayIndex][thirdArrayIndex] 
+                                && (firstArrayIndex + 1)
+                                * (secondArrayIndex + 1) > 0) {
+                            processedData[firstArrayIndex][secondArrayIndex][thirdArrayIndex] *= 2;
                         } else {
                             continue;
                         }
                     }
                 }
             }
-            for (i = 0; i < data2.length; i++) {
-                for (j = 0; j < data2[0].length; j++) {
-                    out.write(data2[i][j] + "\t");
+            for (int i = 0; i < processedData.length; i++) {
+                for (int j = 0; j < processedData[0].length; j++) {
+                    out.write(processedData[i][j] + "\t");
                 }
             }
             out.close();
