@@ -1,4 +1,7 @@
-
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
+ */
 package sensordataprocessor;
 
 /**
@@ -12,19 +15,19 @@ public class SensorDataProcessor {
     public double[][] limit;
 // constructor
 
-// Renamed the constructor name to be as same as class name
-    public SensorDataProcessor(double[][][] data, double[][] limit) {
+    public DataProcessor(double[][][] data, double[][] limit) {
         this.data = data;
         this.limit = limit;
     }
 // calculates average of sensor data
 
     private double average(double[] array) {
-        double value = 0;
-        for (int i = 0; i < array.length; i++) {
-            value += array[i];
+        int i = 0;
+        double val = 0;
+        for (i = 0; i < array.length; i++) {
+            val += array[i];
         }
-        return value / array.length;
+        return val / array.length;
     }
 // calculate data
 
